@@ -1,0 +1,5 @@
+M = Number categories/classes
+R* = Theoritcal Min possible error (Bayes Probability of error)
+R = Probability of error
+Features = actual input data i.e height = 145cm
+(R|B) probaility R given B
