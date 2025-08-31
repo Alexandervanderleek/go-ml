@@ -18,24 +18,36 @@ type PointWithDistance struct {
 
 type Option func(*KNN)
 
-func NewKnn(options ...Option) {
+func WithDistance(df DistanceFunc) Option {
+	return func(knn *KNN) {
+		knn.distanceFunc = df
+	}
+}
+
+func NewKnn(options ...Option) *KNN {
 
 	knn := &KNN{}
 	for _, option := range options {
 		option(knn)
 	}
 
+	return knn
+
 }
 
-func (knn *KNN) CalculateNeighbours(k uint, data goml.DataSet, point goml.Sample) ([]PointWithDistance, error) {
-	if k == 1 {
+func (knn *KNN) CalculateNeighbours(k uint, data *goml.DataSet, point []float64) ([]PointWithDistance, error) {
+	if k < 1 {
 		return nil, fmt.Errorf("Require neighbours of at least 1.")
 	}
 
-	resultDistances := make([]PointWithDistance, len(data.Samples))
+	resultDistances := make([]PointWithDistance, 0, len(data.Samples))
 
-	for i, val := range data.Samples {
-		distance, err := knn.distanceFunc.Distance(val.Features, point.Features)
+	for _, val := range data.Samples {
+		distance, err := knn.distanceFunc.Distance(val.Features, point)
+
+		if err != nil {
+			return nil, err
+		}
 
 		resultDistances = append(resultDistances, PointWithDistance{
 			val,
@@ -47,5 +59,5 @@ func (knn *KNN) CalculateNeighbours(k uint, data goml.DataSet, point goml.Sample
 		return resultDistances[i].distance < resultDistances[j].distance
 	})
 
-	return resultDistances, nil
+	return resultDistances[:k], nil
 }
