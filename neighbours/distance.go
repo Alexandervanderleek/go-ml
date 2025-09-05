@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	sliceLengthMismatch = fmt.Errorf("Slices need to be of equal length.")
+	SliceLengthMismatch = fmt.Errorf("Slices need to be of equal length.")
 )
 
 type DistanceFunc interface {
@@ -24,7 +24,7 @@ type Manhattan struct{}
 func (m *Manhattan) Distance(x, y []float64) (float64, error) {
 
 	if len(x) != len(y) {
-		return 0, sliceLengthMismatch
+		return 0, SliceLengthMismatch
 	}
 
 	var result float64

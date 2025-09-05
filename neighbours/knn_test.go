@@ -21,7 +21,7 @@ func TestKNNMahattanDistance(t *testing.T) {
 
 	knn := NewKnn(WithDistance(&Manhattan{}))
 
-	closest, err := knn.CalculateNeighbours(1, dataSet, []float64{4, 5})
+	closest, err := knn.FindNeighbors(1, dataSet, []float64{4, 5})
 
 	if err != nil {
 		t.Fatal(err)

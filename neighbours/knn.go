@@ -1,6 +1,7 @@
 package neighbours
 
 import (
+	"container/heap"
 	"fmt"
 	"sort"
 
@@ -35,12 +36,14 @@ func NewKnn(options ...Option) *KNN {
 
 }
 
-func (knn *KNN) CalculateNeighbours(k uint, data *goml.DataSet, point []float64) ([]PointWithDistance, error) {
+func (knn *KNN) FindNeighbors(k uint, data *goml.DataSet, point []float64) ([]PointWithDistance, error) {
+
 	if k < 1 {
-		return nil, fmt.Errorf("Require neighbours of at least 1.")
+		return nil, fmt.Errorf("Require K value of at least 1")
 	}
 
-	resultDistances := make([]PointWithDistance, 0, len(data.Samples))
+	maxHeap := &neighboursHeap{}
+	heap.Init(maxHeap)
 
 	for _, val := range data.Samples {
 		distance, err := knn.distanceFunc.Distance(val.Features, point)
@@ -49,15 +52,25 @@ func (knn *KNN) CalculateNeighbours(k uint, data *goml.DataSet, point []float64)
 			return nil, err
 		}
 
-		resultDistances = append(resultDistances, PointWithDistance{
-			val,
-			distance,
-		})
+		if maxHeap.Len() < int(k) {
+			heap.Push(maxHeap, PointWithDistance{
+				val,
+				distance,
+			})
+		} else {
+			if distance < (*maxHeap)[0].distance {
+				heap.Pop(maxHeap)
+				heap.Push(maxHeap, PointWithDistance{
+					val,
+					distance,
+				})
+			}
+		}
 	}
 
-	sort.Slice(resultDistances, func(i, j int) bool {
-		return resultDistances[i].distance < resultDistances[j].distance
+	sort.Slice(*maxHeap, func(i, j int) bool {
+		return (*maxHeap)[i].distance < (*maxHeap)[j].distance
 	})
 
-	return resultDistances[:k], nil
+	return *maxHeap, nil
 }
