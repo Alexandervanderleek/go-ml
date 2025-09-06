@@ -33,3 +33,19 @@ func (m *Manhattan) Distance(x, y []float64) (float64, error) {
 	}
 	return result, nil
 }
+
+type Euclidean struct{}
+
+func (e *Euclidean) Distance(x, y []float64) (float64, error) {
+	var total float64
+
+	if len(x) != len(y) {
+		return 0, SliceLengthMismatch
+	}
+
+	for i, x := range x {
+		total += math.Pow(x-y[i], 2)
+	}
+
+	return math.Sqrt(total), nil
+}
