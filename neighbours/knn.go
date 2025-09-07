@@ -46,7 +46,7 @@ func (knn *KNN) FindNeighbors(k uint, data *goml.DataSet, point []float64) ([]Po
 	heap.Init(maxHeap)
 
 	for _, val := range data.Samples {
-		distance, err := knn.distanceFunc.Distance(val.Features, point)
+		distance, err := knn.distanceFunc.distance(val.Features, point)
 
 		if err != nil {
 			return nil, err

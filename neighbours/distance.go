@@ -10,7 +10,7 @@ var (
 )
 
 type DistanceFunc interface {
-	Distance(x, y []float64) (float64, error)
+	distance(x, y []float64) (float64, error)
 }
 
 // Can only move in straight lines from point x to point y
@@ -21,7 +21,7 @@ type DistanceFunc interface {
 //	x
 type Manhattan struct{}
 
-func (m *Manhattan) Distance(x, y []float64) (float64, error) {
+func (m *Manhattan) distance(x, y []float64) (float64, error) {
 
 	if len(x) != len(y) {
 		return 0, SliceLengthMismatch
@@ -36,7 +36,7 @@ func (m *Manhattan) Distance(x, y []float64) (float64, error) {
 
 type Euclidean struct{}
 
-func (e *Euclidean) Distance(x, y []float64) (float64, error) {
+func (e *Euclidean) distance(x, y []float64) (float64, error) {
 	var total float64
 
 	if len(x) != len(y) {

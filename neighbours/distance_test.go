@@ -1,12 +1,15 @@
 package neighbours
 
 import (
+	"errors"
 	"math"
 	"testing"
 )
 
-func TestEuclideanDistance(t *testing.T) {
+func TestDistanceFunctions(t *testing.T) {
+	euclidean := &Euclidean{}
 	tests := []struct {
+		distanceFunc     DistanceFunc
 		name             string
 		point1           []float64
 		point2           []float64
@@ -14,24 +17,31 @@ func TestEuclideanDistance(t *testing.T) {
 		wantError        error
 	}{
 		{
-			"x, y plane distance calculation", []float64{1, 2}, []float64{2, 3}, 1.414213, nil,
+			euclidean, "Euclidean: x, y plane distance calculation", []float64{1, 2}, []float64{2, 3}, math.Sqrt2, nil,
 		},
 		{
-			"x, y, z plane distance calculation", []float64{1, 2, 3}, []float64{2, 3, 4}, 1.414213, nil,
+			euclidean, "Euclidean: x, y, z plane distance calculation", []float64{1, 2, 3}, []float64{2, 3, 4}, math.Sqrt(3), nil,
+		},
+		{
+			euclidean, "Euclidean: non-equal feature counts should error", []float64{1, 2}, []float64{2, 3, 4}, 1.73205, SliceLengthMismatch,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			euclidean := &Euclidean{}
-			res, _ := euclidean.Distance(test.point1, test.point2)
 
-			const epsilon = 1e-6
-			if diff := math.Abs(res - test.expectedDistance); diff > epsilon {
-				t.Errorf("Expected: %f, Actual: %f", test.expectedDistance, res)
+			res, err := test.distanceFunc.distance(test.point1, test.point2)
+
+			if test.wantError != nil {
+				if !errors.Is(test.wantError, err) {
+					t.Errorf("Expected error: %v, Actual: %v", test.wantError, err)
+				}
+				return
 			}
 
+			if test.expectedDistance != res {
+				t.Errorf("Expected: %f, Actual: %f", test.expectedDistance, res)
+			}
 		})
 	}
-
 }
